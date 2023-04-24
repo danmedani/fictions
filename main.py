@@ -81,7 +81,7 @@ while True:
     next_sentence = create_chat_completion(
         messages=get_novelist_messages(novel, novel_idea),
         model='gpt-4' if args.gpt4 else "gpt-3.5-turbo",
-        temperature=0.6
+        temperature=0.9
     )
     print('\nNOVELIST\n {}'.format(next_sentence))
 
@@ -89,13 +89,13 @@ while True:
     critic_feedback = create_chat_completion(
         messages=get_critic_messages(tmp_novel),
         model='gpt-4' if args.gpt4 else "gpt-3.5-turbo",
-        temperature=0.5
+        temperature=0.7
     )
     print('\nCRITIC\n {}'.format(critic_feedback))
     editor_text = create_chat_completion(
         messages=get_editor_messages(tmp_novel, critic_feedback),
         model='gpt-4' if args.gpt4 else "gpt-3.5-turbo",
-        temperature=0.5
+        temperature=0.7
     )
 
     print('\nEDITOR\n {}'.format(editor_text))
