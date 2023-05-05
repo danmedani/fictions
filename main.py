@@ -1,102 +1,69 @@
+import os
 import openai
 from typing import List
 from typing import Dict
 import argparse
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Process arguments.')
-    parser.add_argument('--api-key', required=True, help='API key for Open AI')
-    parser.add_argument('--gpt4', action='store_true', help='Use the wicked smaht GPT4 model')
-    return parser.parse_args()
-
-def create_chat_completion(messages, model=None, temperature=None) -> str:
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
+def create_completion(prompt: str, model: str, temperature: float) -> str:
+    return openai.Completion.create(
+        engine=model,
+        prompt=prompt,
         temperature=temperature
     )
-    return response.choices[0].message["content"]
 
-def get_novelist_prompt(novel_idea: str) -> str:
+def get_novelist_prompt(novel_idea: str, story_so_far: str) -> str:
     with open('prompts/novelist_prompt.txt', 'r') as f:
-        return f.read().format(novel_idea=novel_idea)
+        return f.read().format(novel_idea=novel_idea, story_so_far=story_so_far)
 
-def get_critic_prompt() -> str:
+def get_slimmer_prompt(story: str) -> str:
+    with open('prompts/slimmer_prompt.txt', 'r') as f:
+        return f.read().format(story=story)
+
+def get_critic_prompt(story: str) -> str:
     with open('prompts/critic_prompt.txt', 'r') as f:
-        return f.read()
+        return f.read().format(story=story)
 
-def get_editor_prompt(feedback: str) -> str:
+def get_editor_prompt(feedback: str, story: str) -> str:
     with open('prompts/editor_prompt.txt', 'r') as novelist_prompt_file:
-        return novelist_prompt_file.read().format(feedback=feedback)
+        return novelist_prompt_file.read().format(feedback=feedback, story=story)
 
-def get_novelist_messages(novel: str, novel_idea: str) -> List[Dict]:
-    return [
-        {
-            'role': 'system',
-            'content': get_novelist_prompt(novel_idea=novel_idea)
-        },
-        {
-            'role': 'user',
-            'content': novel
-        }
-    ]
-
-def get_critic_messages(novel: str) -> List[Dict]:
-    return [
-        {
-            'role': 'system',
-            'content': get_critic_prompt()
-        },
-        {
-            'role': 'user',
-            'content': novel
-        }
-    ]
-
-
-def get_editor_messages(novel: str, feedback: str) -> List[Dict]:
-    return [
-        {
-            'role': 'system',
-            'content': get_editor_prompt(feedback=feedback)
-        },
-        {
-            'role': 'user',
-            'content': novel
-        }
-    ]
-
-
-args = parse_arguments()
-openai.api_key = args.api_key
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 print("""
 Welcome to novel creation bot.
 
 """)
 novel_idea: str = input("This story is about: ")
-
-novel = 'Chapter 1\n'
+story = 'Chapter 1\n\n'
 while True:
-    next_sentence = create_chat_completion(
-        messages=get_novelist_messages(novel, novel_idea),
-        model='gpt-4' if args.gpt4 else "gpt-3.5-turbo",
-        temperature=0.9
-    )
-    print('\nNOVELIST\n {}'.format(next_sentence))
-
-    tmp_novel = novel + next_sentence
-    critic_feedback = create_chat_completion(
-        messages=get_critic_messages(tmp_novel),
-        model='gpt-4' if args.gpt4 else "gpt-3.5-turbo",
+    novelist_prompt = get_novelist_prompt(novel_idea, story)
+    print('\nNOVELIST PROMPT\n')
+    print(novelist_prompt)
+    next_paragraph = create_completion(
+        model='gpt-4',
+        prompt=novelist_prompt,
         temperature=0.7
     )
-    print('\nCRITIC\n {}'.format(critic_feedback))
-    editor_text = create_chat_completion(
-        messages=get_editor_messages(tmp_novel, critic_feedback),
-        model='gpt-4' if args.gpt4 else "gpt-3.5-turbo",
-        temperature=0.7
-    )
+    print('\nNOVELIST RESPONSE\n {}'.format(next_sentence))
+    story = story + next_paragraph
+    # tmp_novel = novel + next_sentence
+    # critic_feedback = create_completion(
+    #     messages=get_critic_messages(tmp_novel),
+    #     model='gpt-4' if args.gpt4 else "gpt-3.5-turbo-0301",
+    #     temperature=0.7
+    # )
+    # print('\nCRITIC\n {}'.format(critic_feedback))
+    # editor_text = create_completion(
+    #     messages=get_editor_messages(tmp_novel, critic_feedback),
+    #     model='gpt-4' if args.gpt4 else "gpt-3.5-turbo-0301",
+    #     temperature=0.7
+    # )
+    # print('\nEDITOR\n {}'.format(editor_text))
+    # slimmer_text = create_completion(
+    #     messages=get_slimmer_messages(editor_text),
+    #     model='gpt-4' if args.gpt4 else "gpt-3.5-turbo-0301",
+    #     temperature=0.4
+    # )
 
-    print('\nEDITOR\n {}'.format(editor_text))
-    novel = editor_text
+    # print('\SLIMMER\n {}'.format(slimmer_text))
+    # novel = slimmer_text

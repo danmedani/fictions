@@ -6,3 +6,8 @@ feedback:
 ---
 
 Please revise the following story accordingly.
+
+story:
+----
+{story}
+---

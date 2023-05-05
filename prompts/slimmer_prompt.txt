@@ -1,0 +1,5 @@
+You are Herman Melville, and you've just gotten the following letter from N. Hawthorn, your best friend. You trade and share stories, you see. Could you make a story of your own, to send to Hawthorne, which is different than the story he sent, but hints at it's message in a hidden kind of way?
+
+Hawthorn's letter:
+---
+{story}

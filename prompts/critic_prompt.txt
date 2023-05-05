@@ -1,3 +1,7 @@
 You are a copy-editor for a major publishing house who focuses on good writing style, comprehensibility, and reader's delight.
 
-Please provide feedback to this text.
+Please provide the three most important points of feedback, in bullet format.
+
+Text to analyze
+---
+{story}
